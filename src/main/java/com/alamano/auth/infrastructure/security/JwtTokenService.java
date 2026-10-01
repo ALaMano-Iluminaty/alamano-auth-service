@@ -3,7 +3,6 @@ package com.alamano.auth.infrastructure.security;
 import com.alamano.auth.application.TokenService;
 import com.alamano.auth.domain.Usuario;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -40,7 +39,7 @@ public class JwtTokenService implements TokenService {
                 .claim("rol", usuario.rol().name())
                 .issuedAt(Date.from(ahora))
                 .expiration(Date.from(expira))
-                .signWith(privateKey, SignatureAlgorithm.RS256)
+                .signWith(privateKey)
                 .compact();
     }
 }
