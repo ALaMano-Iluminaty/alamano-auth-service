@@ -1,0 +1,32 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: alamano-auth-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/alamano?currentSchema=auth}
+    username: ${SPRING_DATASOURCE_USERNAME:auth_app}
+    password: ${SPRING_DATASOURCE_PASSWORD:auth_app}
+  jpa:
+    hibernate:
+      ddl-auto: validate   # el esquema lo crea Flyway, no Hibernate
+    properties:
+      hibernate:
+        default_schema: auth
+  flyway:
+    schemas: auth
+    default-schema: auth
+    locations: classpath:db/migration
+
+app:
+  jwt:
+    private-key-path: ${JWT_PRIVATE_KEY_PATH:./keys/jwt-private.pem}
+    public-key-path: ${JWT_PUBLIC_KEY_PATH:./keys/jwt-public.pem}
+    expiration-minutes: 60
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
