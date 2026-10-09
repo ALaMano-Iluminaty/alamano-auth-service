@@ -1,0 +1,8 @@
+target/
+.git/
+.github/
+.idea/
+.mvn/wrapper/maven-wrapper.jar
+*.md
+# La llave privada NUNCA entra a la imagen: se monta en tiempo de ejecucion.
+/keys/

@@ -1,0 +1,14 @@
+# Perfil de pruebas: base en memoria, sin contenedores ni Postgres levantado a mano.
+# Mismo enfoque que alamano-core-service.
+#
+# DATABASE_TO_LOWER=TRUE es obligatorio: sin el, H2 crea AUTH.USUARIOS en mayuscula
+# y la validacion de Hibernate falla con "missing table [usuarios]".
+spring:
+  datasource:
+    url: jdbc:h2:mem:auth;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  flyway:
+    schemas: auth
+    default-schema: auth
