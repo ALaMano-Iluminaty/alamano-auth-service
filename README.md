@@ -162,11 +162,36 @@ curl -X POST http://localhost:8081/auth/register -H "Content-Type: application/j
 
 ## Pruebas
 
-`.\mvnw.cmd test` no necesita Postgres ni Docker: el perfil `test` usa H2 en memoria y Flyway aplica las mismas migraciones.
+`.\mvnw.cmd verify` corre 27 pruebas y **no necesita Postgres, Docker ni las llaves**: el
+perfil `test` usa H2 en memoria, Flyway aplica las mismas migraciones y
+`JwtTokenServiceTest` genera su propio par de llaves.
 
-`JwtTokenServiceTest` genera su propio par de llaves, así que tampoco depende de `keys/`.
+| Clase | Qué cubre |
+|---|---|
+| `RegisterUseCaseTest` | 8 · hash bcrypt, normalización del correo, rol por defecto, correo duplicado |
+| `LoginUseCaseTest` | 5 · credenciales válidas e inválidas, y que el mensaje de error no delate qué correos existen |
+| `AuthControllerIntegrationTest` | 10 · los dos endpoints de punta a punta contra la base, con sus 201, 400, 409 y 401 |
+| `JwtTokenServiceTest` | 3 · los claims del token y la firma RS256 |
+| `AlamanoAuthServiceApplicationTests` | 1 · que el contexto completo arranque |
 
-La URL de H2 lleva `DATABASE_TO_LOWER=TRUE` y es obligatorio: sin eso H2 crea `AUTH.USUARIOS` en mayúsculas, Hibernate busca `auth.usuarios` en minúsculas y la validación del esquema falla con `missing table [usuarios]`.
+Dos cosas que conviene saber antes de agregar pruebas aquí:
+
+**Los dobles son a mano, no con Mockito.** Este servicio usa los *starters* modulares de
+Spring Boot 4, y no dependemos de que traigan Mockito. El codificador de contraseñas y el
+repositorio de la prueba de integración son los reales, no simulados.
+
+**Las clases terminan en `Test`, nunca en `IT`.** Surefire solo ejecuta `*Test` y `*Tests`;
+una clase `*IT` la corre Failsafe, que este proyecto no tiene configurado, así que se
+quedaría sin ejecutar **mientras el build pasa en verde**. Si dudas de si algo corrió:
+
+```powershell
+Get-Content target\surefire-reports\*.txt | Select-String "Tests run"
+```
+
+**Sobre la URL de H2:** lleva `DATABASE_TO_LOWER=TRUE` y no es opcional. Sin eso H2 crea
+`AUTH.USUARIOS` en mayúsculas, Hibernate busca `auth.usuarios` en minúsculas y la
+validación del esquema falla con `missing table [usuarios]`. Por lo mismo, las consultas
+con `JdbcTemplate` en las pruebas llevan el esquema: `DELETE FROM auth.usuarios`.
 
 ## Si ya tienes otro Postgres en el puerto 5432
 
@@ -192,4 +217,4 @@ Eso vive en `.idea/workspace.xml`, que está en `.gitignore`: es solo para tu m�
 |---|---|
 | **1.1** `[Auth] Registro de usuarios con validación y hash bcrypt` | Hecha |
 | **1.2** `[Auth] Login, emisión de JWT RS256 con rol` | Hecha |
-| **1.4** `[QA] Pruebas unitarias y de integración` | Parcial: `JwtTokenServiceTest` y el arranque del contexto. Faltan `RegisterUseCase` y `LoginUseCase`. |
+| **1.4** `[QA] Pruebas unitarias y de integración` (AB#334) | Hecha. 27 pruebas en 5 clases |
