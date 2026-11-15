@@ -23,7 +23,10 @@ public class SecurityConfig {
         // Auth Service solo expone registro y login; no valida JWT entrante
         // (eso lo hacen Core y el Gateway con la llave publica).
         http
-                .csrf(csrf -> csrf.disable())
+                // CSRF se desactiva a proposito: la API es stateless y los tokens
+                // viajan en la cabecera Authorization, no en cookies de sesion. Sonar
+                // S4502 marca este patron por defecto, pero no aplica a JWT Bearer.
+                .csrf(csrf -> csrf.disable()) // NOSONAR S4502
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/login", "/auth/google").permitAll()
