@@ -1,5 +1,6 @@
 package com.alamano.auth.infrastructure.web;
 
+import com.alamano.auth.application.GoogleLoginUseCase;
 import com.alamano.auth.application.LoginUseCase;
 import com.alamano.auth.application.RegisterUseCase;
 import com.alamano.auth.domain.Usuario;
@@ -15,10 +16,13 @@ public class AuthController {
 
     private final RegisterUseCase registerUseCase;
     private final LoginUseCase loginUseCase;
+    private final GoogleLoginUseCase googleLoginUseCase;
 
-    public AuthController(RegisterUseCase registerUseCase, LoginUseCase loginUseCase) {
+    public AuthController(RegisterUseCase registerUseCase, LoginUseCase loginUseCase,
+                          GoogleLoginUseCase googleLoginUseCase) {
         this.registerUseCase = registerUseCase;
         this.loginUseCase = loginUseCase;
+        this.googleLoginUseCase = googleLoginUseCase;
     }
 
     @PostMapping("/register")
@@ -30,6 +34,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginUseCase.Resultado resultado = loginUseCase.ejecutar(request.correo(), request.password());
+        return ResponseEntity.ok(new LoginResponse(resultado.token(), UsuarioResponse.from(resultado.usuario())));
+    }
+
+    /** HU-Q2: el frontend hace OpenID Connect con PKCE y manda aqui el id_token de Google. */
+    @PostMapping("/google")
+    public ResponseEntity<LoginResponse> google(@Valid @RequestBody GoogleLoginRequest request) {
+        LoginUseCase.Resultado resultado = googleLoginUseCase.ejecutar(request.idToken());
         return ResponseEntity.ok(new LoginResponse(resultado.token(), UsuarioResponse.from(resultado.usuario())));
     }
 }

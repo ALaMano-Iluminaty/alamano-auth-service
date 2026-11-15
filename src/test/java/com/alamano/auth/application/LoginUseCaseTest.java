@@ -64,6 +64,15 @@ class LoginUseCaseTest {
     }
 
     @Test
+    void unaCuentaDeGoogleSinContrasenaNoEntraConContrasena() {
+        repositorio.save(Usuario.deGoogle("Pedro", "pedro@gmail.com", "g-pedro"));
+
+        assertThrows(CredencialesInvalidasException.class,
+                () -> iniciarSesion.ejecutar("pedro@gmail.com", PASSWORD));
+        assertEquals(0, tokensEmitidos);
+    }
+
+    @Test
     void elMensajeNoRevelaSiElCorreoExiste() {
         // Si el mensaje cambiara, se podria averiguar que correos estan registrados.
         String correoMal = assertThrows(CredencialesInvalidasException.class,

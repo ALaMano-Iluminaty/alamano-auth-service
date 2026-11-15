@@ -24,18 +24,23 @@ import java.util.Date;
 public class JwtTokenService implements TokenService {
 
     private final PrivateKey privateKey;
-    private final long expirationMinutes;
+    private final Duration vidaPorDefecto;
 
     public JwtTokenService(PrivateKey jwtPrivateKey,
                             @Value("${app.jwt.expiration-minutes:60}") long expirationMinutes) {
         this.privateKey = jwtPrivateKey;
-        this.expirationMinutes = expirationMinutes;
+        this.vidaPorDefecto = Duration.ofMinutes(expirationMinutes);
     }
 
     @Override
     public String generarToken(Usuario usuario) {
+        return generarToken(usuario, vidaPorDefecto);
+    }
+
+    @Override
+    public String generarToken(Usuario usuario, Duration vida) {
         Instant ahora = Instant.now();
-        Instant expira = ahora.plus(Duration.ofMinutes(expirationMinutes));
+        Instant expira = ahora.plus(vida);
 
         return Jwts.builder()
                 .subject(String.valueOf(usuario.id()))

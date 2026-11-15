@@ -24,11 +24,26 @@ class JwtTokenServiceTest {
         par = generador.generateKeyPair();
     }
 
-    private Claims claimsDe(Rol rol) {
-        Usuario usuario = new Usuario(42L, "Ana Torres", "ana@example.com", "hash", rol, Instant.now());
-        String token = new JwtTokenService(par.getPrivate(), 60).generarToken(usuario);
+    private static Usuario usuario(Rol rol) {
+        return new Usuario(42L, "Ana Torres", "ana@example.com", "hash", rol, Instant.now(), null);
+    }
+
+    private static Claims parsear(String token) {
         // Se verifica con la llave PUBLICA, igual que hacen Core y el Gateway.
         return Jwts.parser().verifyWith(par.getPublic()).build().parseSignedClaims(token).getPayload();
+    }
+
+    private Claims claimsDe(Rol rol) {
+        return parsear(new JwtTokenService(par.getPrivate(), 60).generarToken(usuario(rol)));
+    }
+
+    @Test
+    void laVidaExplicitaMandaSobreLaConfigurada() {
+        Claims claims = parsear(new JwtTokenService(par.getPrivate(), 60)
+                .generarToken(usuario(Rol.USUARIO), java.time.Duration.ofMinutes(30)));
+
+        long vidaSegundos = (claims.getExpiration().getTime() - claims.getIssuedAt().getTime()) / 1000;
+        assertEquals(30 * 60, vidaSegundos);
     }
 
     @Test
