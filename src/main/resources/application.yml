@@ -24,13 +24,32 @@ app:
     private-key-path: ${JWT_PRIVATE_KEY_PATH:./keys/jwt-private.pem}
     public-key-path: ${JWT_PUBLIC_KEY_PATH:./keys/jwt-public.pem}
     expiration-minutes: 60
+  google:
+    # Client ID de la app en Google Cloud (OAuth 2.0 Client, tipo Web). Sin el, todo id_token se rechaza.
+    client-id: ${GOOGLE_CLIENT_ID:}
+    jwk-set-uri: ${GOOGLE_JWK_SET_URI:https://www.googleapis.com/oauth2/v3/certs}
+    # HU-Q2: el JWT propio emitido tras el login con Google vive 30 minutos o menos.
+    expiration-minutes: 30
 
 management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: ${spring.application.name}
+      instance: ${HOSTNAME:local}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
 
 logging:
+  structured:
+    format:
+      console: ecs
   level:
-    org.springframework.security: DEBUG
+    org.springframework.security: INFO

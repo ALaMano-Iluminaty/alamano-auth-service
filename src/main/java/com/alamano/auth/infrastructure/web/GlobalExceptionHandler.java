@@ -2,6 +2,7 @@ package com.alamano.auth.infrastructure.web;
 
 import com.alamano.auth.application.exception.CorreoYaRegistradoException;
 import com.alamano.auth.application.exception.CredencialesInvalidasException;
+import com.alamano.auth.application.exception.TokenGoogleInvalidoException;
 import com.alamano.auth.infrastructure.web.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(ex.getMessage()));
     }
 
-    @ExceptionHandler(CredencialesInvalidasException.class)
-    public ResponseEntity<ErrorResponse> handleCredencialesInvalidas(CredencialesInvalidasException ex) {
+    @ExceptionHandler({CredencialesInvalidasException.class, TokenGoogleInvalidoException.class})
+    public ResponseEntity<ErrorResponse> handleNoAutorizado(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(ex.getMessage()));
     }
 

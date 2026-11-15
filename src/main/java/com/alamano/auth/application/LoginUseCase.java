@@ -34,7 +34,8 @@ public class LoginUseCase {
         Usuario usuario = usuarioRepository.findByCorreo(correoNormalizado)
                 .orElseThrow(CredencialesInvalidasException::new);
 
-        if (!passwordEncoder.matches(passwordPlano, usuario.passwordHash())) {
+        // Una cuenta creada con Google no tiene contrasena: nunca entra por este camino.
+        if (!usuario.tieneContrasena() || !passwordEncoder.matches(passwordPlano, usuario.passwordHash())) {
             throw new CredencialesInvalidasException();
         }
 

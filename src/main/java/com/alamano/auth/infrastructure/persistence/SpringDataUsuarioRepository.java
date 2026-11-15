@@ -9,4 +9,6 @@ public interface SpringDataUsuarioRepository extends JpaRepository<UsuarioJpaEnt
     boolean existsByCorreo(String correo);
 
     Optional<UsuarioJpaEntity> findByCorreo(String correo);
+
+    Optional<UsuarioJpaEntity> findByGoogleSub(String googleSub);
 }

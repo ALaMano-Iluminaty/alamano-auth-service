@@ -28,7 +28,8 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
                 usuario.correo(),
                 usuario.passwordHash(),
                 usuario.rol(),
-                usuario.creadoEn()
+                usuario.creadoEn(),
+                usuario.googleSub()
         );
         UsuarioJpaEntity guardado = springDataRepository.save(entity);
         return toDomain(guardado);
@@ -39,6 +40,11 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
         return springDataRepository.findByCorreo(correo).map(this::toDomain);
     }
 
+    @Override
+    public Optional<Usuario> findByGoogleSub(String googleSub) {
+        return springDataRepository.findByGoogleSub(googleSub).map(this::toDomain);
+    }
+
     private Usuario toDomain(UsuarioJpaEntity entity) {
         return new Usuario(
                 entity.getId(),
@@ -46,7 +52,8 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
                 entity.getCorreo(),
                 entity.getPasswordHash(),
                 entity.getRol(),
-                entity.getCreadoEn()
+                entity.getCreadoEn(),
+                entity.getGoogleSub()
         );
     }
 }

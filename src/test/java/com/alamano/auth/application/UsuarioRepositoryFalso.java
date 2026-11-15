@@ -36,4 +36,9 @@ class UsuarioRepositoryFalso implements UsuarioRepository {
     public Optional<Usuario> findByCorreo(String correo) {
         return Optional.ofNullable(porCorreo.get(correo));
     }
+
+    @Override
+    public Optional<Usuario> findByGoogleSub(String googleSub) {
+        return porCorreo.values().stream().filter(u -> googleSub.equals(u.googleSub())).findFirst();
+    }
 }

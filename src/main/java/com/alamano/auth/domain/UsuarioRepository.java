@@ -13,4 +13,6 @@ public interface UsuarioRepository {
     Usuario save(Usuario usuario);
 
     Optional<Usuario> findByCorreo(String correo);
+
+    Optional<Usuario> findByGoogleSub(String googleSub);
 }
