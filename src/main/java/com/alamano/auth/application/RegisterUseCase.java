@@ -1,5 +1,6 @@
 package com.alamano.auth.application;
 
+import com.alamano.auth.application.exception.AccesoDenegadoException;
 import com.alamano.auth.application.exception.CorreoYaRegistradoException;
 import com.alamano.auth.domain.Rol;
 import com.alamano.auth.domain.Usuario;
@@ -25,6 +26,11 @@ public class RegisterUseCase {
     }
 
     public Usuario ejecutar(String nombre, String correo, String passwordPlano, Rol rol) {
+        // Nadie se hace administrador registrandose: el rol ADMIN solo lo asigna otro ADMIN.
+        if (rol == Rol.ADMIN) {
+            throw new AccesoDenegadoException("No se puede registrar una cuenta de administrador");
+        }
+
         String correoNormalizado = correo.trim().toLowerCase();
 
         if (usuarioRepository.existsByCorreo(correoNormalizado)) {

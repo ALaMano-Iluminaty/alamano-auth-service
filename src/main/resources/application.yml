@@ -20,6 +20,12 @@ spring:
     locations: classpath:db/migration
 
 app:
+  auth:
+    # Politica del proyecto: nada de logins caseros. Con false, /auth/register y /auth/login no existen.
+    local-login-enabled: ${LOCAL_LOGIN_ENABLED:false}
+  admin:
+    # Correos (separados por coma) que entran como ADMIN al iniciar sesion con Google.
+    emails: ${ADMIN_EMAILS:}
   jwt:
     private-key-path: ${JWT_PRIVATE_KEY_PATH:./keys/jwt-private.pem}
     public-key-path: ${JWT_PUBLIC_KEY_PATH:./keys/jwt-public.pem}

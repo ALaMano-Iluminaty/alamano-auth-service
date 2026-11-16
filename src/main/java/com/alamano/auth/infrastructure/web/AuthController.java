@@ -2,42 +2,28 @@ package com.alamano.auth.infrastructure.web;
 
 import com.alamano.auth.application.GoogleLoginUseCase;
 import com.alamano.auth.application.LoginUseCase;
-import com.alamano.auth.application.RegisterUseCase;
-import com.alamano.auth.domain.Usuario;
-import com.alamano.auth.infrastructure.web.dto.*;
+import com.alamano.auth.infrastructure.web.dto.GoogleLoginRequest;
+import com.alamano.auth.infrastructure.web.dto.LoginResponse;
+import com.alamano.auth.infrastructure.web.dto.UsuarioResponse;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+/** Unica puerta de entrada de identidad: el proveedor externo (Google). */
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final RegisterUseCase registerUseCase;
-    private final LoginUseCase loginUseCase;
     private final GoogleLoginUseCase googleLoginUseCase;
 
-    public AuthController(RegisterUseCase registerUseCase, LoginUseCase loginUseCase,
-                          GoogleLoginUseCase googleLoginUseCase) {
-        this.registerUseCase = registerUseCase;
-        this.loginUseCase = loginUseCase;
+    public AuthController(GoogleLoginUseCase googleLoginUseCase) {
         this.googleLoginUseCase = googleLoginUseCase;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<UsuarioResponse> register(@Valid @RequestBody RegisterRequest request) {
-        Usuario usuario = registerUseCase.ejecutar(request.nombre(), request.correo(), request.password(), request.rol());
-        return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.from(usuario));
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        LoginUseCase.Resultado resultado = loginUseCase.ejecutar(request.correo(), request.password());
-        return ResponseEntity.ok(new LoginResponse(resultado.token(), UsuarioResponse.from(resultado.usuario())));
-    }
-
-    /** HU-Q2: el frontend hace OpenID Connect con PKCE y manda aqui el id_token de Google. */
+    /** HU-Q2: el frontend manda aqui el id_token que le entrega Google Identity Services. */
     @PostMapping("/google")
     public ResponseEntity<LoginResponse> google(@Valid @RequestBody GoogleLoginRequest request) {
         LoginUseCase.Resultado resultado = googleLoginUseCase.ejecutar(request.idToken());

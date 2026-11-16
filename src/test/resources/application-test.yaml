@@ -12,3 +12,8 @@ spring:
   flyway:
     schemas: auth
     default-schema: auth
+
+# Las pruebas de registro y login con contrasena necesitan las rutas locales encendidas.
+app:
+  auth:
+    local-login-enabled: true

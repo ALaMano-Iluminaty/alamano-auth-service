@@ -38,6 +38,16 @@ class UsuarioRepositoryFalso implements UsuarioRepository {
     }
 
     @Override
+    public Optional<Usuario> findById(Long id) {
+        return porCorreo.values().stream().filter(u -> id.equals(u.id())).findFirst();
+    }
+
+    @Override
+    public List<Usuario> findAll() {
+        return new ArrayList<>(porCorreo.values());
+    }
+
+    @Override
     public Optional<Usuario> findByGoogleSub(String googleSub) {
         return porCorreo.values().stream().filter(u -> googleSub.equals(u.googleSub())).findFirst();
     }

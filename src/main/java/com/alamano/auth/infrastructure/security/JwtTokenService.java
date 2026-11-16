@@ -59,6 +59,7 @@ public class JwtTokenService implements TokenService {
         return switch (rol) {
             case VENDEDOR -> "PROFESSIONAL";
             case USUARIO -> "CLIENT";
+            case ADMIN -> "ADMIN";
         };
     }
 }

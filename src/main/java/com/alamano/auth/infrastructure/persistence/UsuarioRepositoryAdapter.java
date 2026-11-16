@@ -4,6 +4,7 @@ import com.alamano.auth.domain.Usuario;
 import com.alamano.auth.domain.UsuarioRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -43,6 +44,16 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
     @Override
     public Optional<Usuario> findByGoogleSub(String googleSub) {
         return springDataRepository.findByGoogleSub(googleSub).map(this::toDomain);
+    }
+
+    @Override
+    public Optional<Usuario> findById(Long id) {
+        return springDataRepository.findById(id).map(this::toDomain);
+    }
+
+    @Override
+    public List<Usuario> findAll() {
+        return springDataRepository.findAllByOrderByIdAsc().stream().map(this::toDomain).toList();
     }
 
     private Usuario toDomain(UsuarioJpaEntity entity) {

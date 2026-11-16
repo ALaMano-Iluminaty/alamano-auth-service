@@ -1,9 +1,14 @@
 package com.alamano.auth.application;
 
 import com.alamano.auth.application.exception.TokenGoogleInvalidoException;
+import com.alamano.auth.domain.Rol;
 import com.alamano.auth.domain.Usuario;
 import com.alamano.auth.domain.UsuarioRepository;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -20,14 +25,31 @@ public class GoogleLoginUseCase {
     private final GoogleIdTokenVerifier verifier;
     private final TokenService tokenService;
     private final Duration vidaDelToken;
+    private final Set<String> correosAdmin;
 
     public GoogleLoginUseCase(UsuarioRepository usuarioRepository, GoogleIdTokenVerifier verifier,
+                              TokenService tokenService, long expirationMinutes) {
+        this(usuarioRepository, verifier, tokenService, expirationMinutes, "");
+    }
+
+    /**
+     * @param correosAdmin correos (separados por coma) que entran como ADMIN. Es la forma de
+     *                     tener el primer administrador sin tocar la base de datos a mano;
+     *                     los demas roles los cambia un ADMIN desde la pantalla de usuarios.
+     */
+    @Autowired
+    public GoogleLoginUseCase(UsuarioRepository usuarioRepository, GoogleIdTokenVerifier verifier,
                               TokenService tokenService,
-                              @Value("${app.google.expiration-minutes:30}") long expirationMinutes) {
+                              @Value("${app.google.expiration-minutes:30}") long expirationMinutes,
+                              @Value("${app.admin.emails:}") String correosAdmin) {
         this.usuarioRepository = usuarioRepository;
         this.verifier = verifier;
         this.tokenService = tokenService;
         this.vidaDelToken = Duration.ofMinutes(Math.min(expirationMinutes, VIDA_MAXIMA_MINUTOS));
+        this.correosAdmin = Arrays.stream(correosAdmin.split(","))
+                .map(correo -> correo.trim().toLowerCase())
+                .filter(correo -> !correo.isEmpty())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public LoginUseCase.Resultado ejecutar(String idToken) {
@@ -42,6 +64,10 @@ public class GoogleLoginUseCase {
                         .map(existente -> usuarioRepository.save(existente.vinculadoAGoogle(identidad.sub()))))
                 .orElseGet(() -> usuarioRepository.save(Usuario.deGoogle(nombreDe(identidad, correo), correo,
                         identidad.sub())));
+
+        if (correosAdmin.contains(correo) && usuario.rol() != Rol.ADMIN) {
+            usuario = usuarioRepository.save(usuario.conRol(Rol.ADMIN));
+        }
 
         return new LoginUseCase.Resultado(tokenService.generarToken(usuario, vidaDelToken), usuario);
     }

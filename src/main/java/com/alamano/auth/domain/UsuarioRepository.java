@@ -1,5 +1,6 @@
 package com.alamano.auth.domain;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -15,4 +16,9 @@ public interface UsuarioRepository {
     Optional<Usuario> findByCorreo(String correo);
 
     Optional<Usuario> findByGoogleSub(String googleSub);
+
+    Optional<Usuario> findById(Long id);
+
+    /** Todas las cuentas, de la mas antigua a la mas nueva. */
+    List<Usuario> findAll();
 }
