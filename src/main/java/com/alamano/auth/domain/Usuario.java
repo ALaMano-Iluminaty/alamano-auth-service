@@ -30,6 +30,10 @@ public record Usuario(
         return new Usuario(id, nombre, correo, passwordHash, rol, creadoEn, googleSub);
     }
 
+    public Usuario conRol(Rol nuevoRol) {
+        return new Usuario(id, nombre, correo, passwordHash, nuevoRol, creadoEn, googleSub);
+    }
+
     public Usuario vinculadoAGoogle(String googleSub) {
         return new Usuario(id, nombre, correo, passwordHash, rol, creadoEn, googleSub);
     }
